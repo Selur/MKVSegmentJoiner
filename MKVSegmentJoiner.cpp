@@ -34,20 +34,47 @@ bool MKVSegmentJoiner::checkTools()
   QString lookingFor = "mkvinfo";
 #ifdef Q_OS_WIN32
   lookingFor += ".exe";
-#endif
   bool mkvinfo = QFile::exists(lookingFor);
+#else
+  QString lookingForUsrBin = "/usr/bin/mkvinfo";
+  QString lookingForUsrLocalBin = "/usr/local/bin/mkvinfo";
+  bool mkvinfoDef = QFile::exists(lookingFor);
+  bool mkvinfoUsr = QFile::exists(lookingForUsrBin);
+  bool mkvinfoUsrLocal = QFile::exists(lookingForUsrLocalBin);
+  bool mkvinfo = false;
+  if (mkvinfoDef || mkvinfoUsr || mkvinfoUsrLocal) {
+    mkvinfo = true;
+  }
+#endif
   QString text = tr("mkvinfo exists: %1").arg(QString(mkvinfo ? "true" : "false"));
+
   lookingFor = "mkvpropedit";
 #ifdef Q_OS_WIN32
   lookingFor += ".exe";
-#endif
   bool mkvpropedit = QFile::exists(lookingFor);
   text += "\r\n";
+#else
+  lookingForUsrBin = "/usr/bin/mkvpropedit";
+  lookingForUsrLocalBin = "/usr/local/bin/mkvpropedit";
+  bool mkvpropeditDef = QFile::exists(lookingFor);
+  bool mkvpropeditUsr = QFile::exists(lookingForUsrBin);
+  bool mkvpropeditUsrLocal = QFile::exists(lookingForUsrLocalBin);
+  bool mkvpropedit = false;
+  if (mkvpropeditDef || mkvpropeditUsr || mkvpropeditUsrLocal) {
+    mkvpropedit = true;
+  }
+  text += "\n";
+#endif
   text += tr("mkvpropedit exists: %1").arg(QString(mkvpropedit ? "true" : "false"));
+
   if (mkvinfo && mkvpropedit) {
     return true;
   }
+#ifdef Q_OS_WIN32
   text += "\r\n";
+#else
+  text += "\n";
+#endif
   text += tr("Both are needed!");
   QMessageBox::information(this, tr("Error"), text);
   return false;
